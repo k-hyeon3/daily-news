@@ -12,7 +12,8 @@
 index.html              뼈대 HTML (스타일·스크립트는 아래 파일을 불러온다)
 manifest.webmanifest    홈 화면 설치용 앱 정보(이름, 색, 아이콘)
 sw.js                   서비스 워커: 오프라인에서도 마지막 화면과 기사 목록이 열린다
-icons/                  앱 아이콘(SVG 원본 + PNG 192/512/maskable/apple-touch)
+icons/                  앱 아이콘(SVG 원본 + PNG 192/512/maskable/apple-touch + Windows용 icon.ico)
+tools/make_shortcut.ps1 바탕화면 바로가기 만들기(주소창 없는 앱 창으로 열림)
 css/
   tokens.css            디자인 토큰(색·간격·반경·글꼴), 다크 모드 값
   layout.css            기본 요소, 사이드바, 메인 영역 뼈대
@@ -132,6 +133,13 @@ Figma 스타터 요금제는 변수 모드가 1개뿐이라 Light는 `Color`, Da
 ## 홈 화면 설치(PWA)
 
 https 또는 localhost에서 열면 브라우저가 설치를 제안한다(Chrome 주소창의 설치 아이콘, iOS Safari는 공유 → 홈 화면에 추가). 같은 출처 파일은 네트워크 우선·실패 시 캐시라서 온라인일 때는 항상 최신이고 오프라인에서는 마지막으로 본 내용이 열린다. 구조를 크게 바꿀 때는 `sw.js`의 `VERSION`을 올린다. 새 파일을 추가하면 `sw.js`의 `SHELL`과 배포 워크플로의 `cp` 목록에도 넣는다.
+
+## 바탕화면 바로가기
+
+`powershell -ExecutionPolicy Bypass -File tools\make_shortcut.ps1`을 실행하면 바탕화면에 "하루 한 판 뉴스" 아이콘이 생기고, 누르면 주소창 없는 앱 창으로 사이트가 열린다(Chrome, 없으면 Edge).
+- 로컬 서버로 열고 싶으면 `-Url http://localhost:8787/`(먼저 `run-local.bat` 실행 필요), 이름을 바꾸려면 `-Name`.
+- 아이콘은 `icons/icon.ico`를 가리킨다. 이 폴더를 옮기면 아이콘만 깨지니 스크립트를 다시 실행한다.
+- 같은 효과를 브라우저 기능으로도 낼 수 있다: Chrome에서 사이트를 열고 주소창의 설치 아이콘(또는 메뉴 → 저장 및 공유 → 앱으로 설치)을 누르면 바탕화면·시작 메뉴에 바로가기가 생긴다(PWA).
 
 ## 규칙
 
