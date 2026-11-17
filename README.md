@@ -2,8 +2,8 @@
 
 분야별 뉴스를 한눈에 보는 페이지. 왼쪽 분야 사이드바에서 정치·경제·사회·IT·과학·국제·문화·스포츠를 고르면 그 분야 기사가 전부 나온다. 맨 위에는 매일 올라오는 "에디터 픽"(분야별 영상 1개 + 요약 + 매체별 보도)이 붙는다.
 
-- 실제 서비스 주소: https://claude.ai/artifact/1ZCiHrsdoomshswRm5ui1B
-- 아티팩트 slug: 047f04b3-3daf-424e-8672-1cda05266dae
+- 서비스 주소: https://k-hyeon3.github.io/daily-news/ (GitHub Pages)
+- 저장소: https://github.com/k-hyeon3/daily-news
 - 디자인(Figma): https://www.figma.com/design/HnpDhVpi5U3mw0Q4jNvNH0
 
 ## 파일 구조
@@ -56,14 +56,25 @@ Figma 파일의 변수와 `css/tokens.css`의 CSS 변수는 같은 이름·값�
 Figma 스타터 요금제는 변수 모드가 1개뿐이라 Light는 `Color`, Dark는 `Color Dark` 컬렉션으로 따로 두었다.
 글꼴: 헤드라인 Noto Serif KR, 본문 IBM Plex Sans KR.
 
-## 실제 페이지(claude.ai 아티팩트)에 반영하기
+## 배포와 자동 갱신 (GitHub Pages)
 
-로컬 파일을 고쳐도 claude.ai 페이지는 바뀌지 않는다. Claude에게 "바탕화면 daily-news 폴더를 하루 한 판 뉴스 아티팩트에 다시 게시해줘"라고 하면 된다. 이제 여러 파일이라 `index.html`과 `css/`, `js/`를 함께 올려야 한다.
+`.github/workflows/update-news.yml`이 아래 경우에 뉴스를 새로 모아 Pages에 배포한다.
 
-주의:
-- 매일 아침 7시 12분 예약 작업은 서비스 쪽 `data/editions.json`만 갱신한다. 다시 게시할 때 `data/editions.json`은 올리지 않는다(올리면 그동안 쌓인 호가 덮어써진다).
-- 아티팩트에서는 브라우저가 외부 서버로 fetch할 수 없어서 `data/news.json`은 게시 시점의 스냅샷이다. 매일 자동으로 바뀌지 않는다. 자동 갱신하려면 예약 작업이 `fetch_news.py`를 돌려 `news.json`도 올리도록 지시문을 고쳐야 한다(Claude에게 요청).
-- 데이터 형식을 바꾸면 예약 작업의 지시문도 같이 고쳐야 한다.
+- 3시간마다(cron `7 */3 * * *`, UTC 기준)
+- `main`에 push할 때(코드나 `data/editions.json`을 고쳤을 때)
+- Actions 탭에서 수동 실행(Run workflow), 또는 `gh workflow run update-news.yml`
+
+동작 방식:
+- `data/news.json`은 저장소에 커밋하지 않는다(`.gitignore`). 배포할 때마다 `tools/fetch_news.py`가 새로 만든다. 로컬에서는 `run-local.bat`이 만든다.
+- 수집 결과가 0건이면 워크플로가 실패하고 이전 배포가 그대로 유지된다.
+- 배포되는 파일은 `index.html`, `css/`, `js/`, `data/`뿐이다(`tools/`와 README는 제외).
+- 상태 확인: `gh run list`, 실패 원인: `gh run view --log-failed`.
+
+코드를 고치고 반영하는 법: 커밋하고 `git push`하면 몇 분 안에 자동 배포된다.
+
+에디터 픽(`data/editions.json`)은 저장소에 커밋된 파일이 원본이다. 이 파일을 고쳐 push하면 다음 배포에 반영된다.
+
+> 옛 claude.ai 아티팩트 "하루 한 판 뉴스"(slug 047f04b3-3daf-424e-8672-1cda05266dae)와 그 아티팩트를 갱신하는 매일 7시 12분 예약 작업("하루 한 판 뉴스 갱신")은 GitHub로 옮기기 전 방식이다. 예약 작업은 아티팩트의 `editions.json`만 고치므로 GitHub Pages에는 반영되지 않는다.
 
 ## 데이터 형식
 
@@ -100,4 +111,4 @@ Figma 스타터 요금제는 변수 모드가 1개뿐이라 Light는 `Color`, Da
 
 - 외부에서 온 제목·요약은 `innerHTML`이 아니라 `textContent`로만 넣는다(`DN.el`, `DN.highlight` 사용). `innerHTML`은 `DN.svg`로 고정 아이콘 문자열을 넣을 때만 쓴다.
 - 링크는 `https://`로 시작할 때만 건다(`DN.safeUrl`).
-- 아티팩트 환경 제약: 유튜브 등 외부 iframe 불가(영상은 링크로만), 외부 이미지 로드 불가(썸네일 없음), 스크립트는 일부 CDN만 허용.
+- 영상은 링크로만 연다(유튜브 iframe은 쓰지 않음). RSS에는 썸네일이 없다.
