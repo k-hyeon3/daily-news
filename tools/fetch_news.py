@@ -166,6 +166,62 @@ def fetch(feed):
     return feed, items, None
 
 
+# ---------- 같은 사건 묶기 ----------
+CLUSTER_MIN_SHARED = 3      # 제목에서 겹치는 핵심어 최소 개수
+CLUSTER_MIN_RATIO = 0.5     # 더 짧은 제목 기준 겹침 비율
+CLUSTER_MAX_SIZE = 8
+STOPWORDS = {"속보", "단독", "종합", "오늘", "내일", "어제", "포토", "영상", "사진", "인터뷰", "논란", "관련", "대한", "위해", "통해", "이후", "가운데"}
+WORD_RE = re.compile(r"[0-9A-Za-z가-힣]+")
+
+
+def title_tokens(title):
+    """제목에서 핵심어 집합을 만든다. 조사·어미 차이를 줄이려고 3글자 이상 단어는 앞 3글자만 쓴다."""
+    toks = set()
+    for w in WORD_RE.findall(re.sub(r"\[[^\]]*\]", " ", title)):
+        if w in STOPWORDS:
+            continue
+        if len(w) >= 3:
+            toks.add(w[:3])
+        elif len(w) == 2:
+            toks.add(w)
+        elif w.isdigit():
+            toks.add(w)
+    return toks
+
+
+def cluster(items, sort_key):
+    """제목이 비슷한 다른 매체 기사를 하나로 묶는다. 대표(lead)는 가장 먼저 나온 기사로 정해
+    새 기사가 붙어도 대표 id(북마크·읽음 기준)가 바뀌지 않게 한다."""
+    order = sorted(items, key=sort_key)            # 오래된 것부터
+    toks = {it["id"]: title_tokens(it["title"]) for it in items}
+    clusters = []                                  # {lead, members:[...]}
+    by_tok = {}                                    # 핵심어 -> 클러스터 번호들
+    for it in order:
+        t = toks[it["id"]]
+        cand = {}
+        for w in t:
+            for ci in by_tok.get(w, ()):
+                cand[ci] = cand.get(ci, 0) + 1
+        best, best_score = None, 0.0
+        for ci, shared in cand.items():
+            c = clusters[ci]
+            lt = toks[c["lead"]["id"]]
+            if shared < CLUSTER_MIN_SHARED or len(c["members"]) >= CLUSTER_MAX_SIZE:
+                continue
+            if any(m["outlet"] == it["outlet"] for m in c["members"]):
+                continue
+            ratio = shared / max(1, min(len(t), len(lt)))
+            if ratio >= CLUSTER_MIN_RATIO and ratio > best_score:
+                best, best_score = ci, ratio
+        if best is None:
+            clusters.append({"lead": it, "members": [it]})
+            for w in t:
+                by_tok.setdefault(w, []).append(len(clusters) - 1)
+        else:
+            clusters[best]["members"].append(it)
+    return clusters
+
+
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -199,15 +255,29 @@ def main():
         base = ref.get(x["category"], now)
         return (datetime.fromisoformat(base) - timedelta(minutes=3 * x["_rank"])).isoformat()
 
-    all_items.sort(key=sort_key, reverse=True)
-    for it in all_items:
-        it.pop("_rank", None)
-    per_cat, kept = {}, []
-    for it in all_items:
-        n = per_cat.get(it["category"], 0)
-        if n < MAX_PER_CATEGORY:
-            per_cat[it["category"]] = n + 1
-            kept.append(it)
+    clusters = cluster(all_items, sort_key)
+
+    kept_items, per_cat = [], {}
+    clusters.sort(key=lambda c: max(sort_key(m) for m in c["members"]), reverse=True)  # 가장 새 기사 기준
+    for c in clusters:
+        lead, members = c["lead"], c["members"]
+        cats = {}
+        for m in members:
+            cats[m["category"]] = cats.get(m["category"], 0) + 1
+        category = max(cats, key=lambda k: (cats[k], k == lead["category"]))
+        n = per_cat.get(category, 0)
+        if n >= MAX_PER_CATEGORY:
+            continue
+        per_cat[category] = n + 1
+        dated = [m["published"] for m in members if m["published"]]
+        rec = {k: lead[k] for k in ("id", "outlet", "title", "url", "summary")}
+        rec["category"] = category
+        rec["published"] = max(dated) if dated else None           # 묶음 안에서 가장 최근 발행 시각
+        rec["ids"] = [m["id"] for m in members]                     # '새 기사' 판정용
+        rec["related"] = [{k: m[k] for k in ("id", "outlet", "title", "url")}
+                          for m in sorted(members, key=sort_key, reverse=True) if m is not lead]
+        kept_items.append(rec)
+    kept = kept_items
 
     out = {
         "updated": datetime.now(KST).isoformat(timespec="seconds"),

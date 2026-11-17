@@ -28,6 +28,10 @@
     $('vCard').setAttribute('aria-pressed', String(S.view === 'card'));
     $('vList').setAttribute('aria-pressed', String(S.view === 'list'));
     $('searchBox').classList.toggle('has', !!S.q);
+    var nb = $('newBtn'), n = DN.base ? DN.news.items.filter(DN.isNew).length : 0;
+    nb.hidden = !DN.base || n === 0;
+    nb.textContent = '새 기사만 (' + n + ')';
+    nb.setAttribute('aria-pressed', String(S.newOnly));
   }
 
   // 화면 전체 다시 그리기. keepOutlets: 매체 드롭다운은 그대로 둘 때(검색·북마크 토글)
@@ -58,6 +62,7 @@
     $('vList').addEventListener('click', function () { setView('list'); });
     $('bmBtn').addEventListener('click', function () { S.bmOnly = !S.bmOnly; S.shown = DN.PAGE; DN.sync(); });
     $('themeBtn').addEventListener('click', DN.toggleTheme);
+    $('newBtn').addEventListener('click', function () { S.newOnly = !S.newOnly; S.shown = DN.PAGE; DN.sync(true); });
 
     document.addEventListener('keydown', function (e) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -92,6 +97,8 @@
     }
     DN.cats = news.categories && news.categories.length ? news.categories
       : Array.from(new Set(news.items.map(function (x) { return x.category; })));
+    var allIds = []; news.items.forEach(function (x) { allIds.push.apply(allIds, x.ids || [x.id]); });
+    DN.initVisit(allIds);
     var h = decodeURIComponent(location.hash.slice(1)); if (h && DN.cats.indexOf(h) >= 0) S.cat = h;
 
     var u = new Date(news.updated), upd = $('upd');
@@ -100,6 +107,11 @@
       if ((Date.now() - u.getTime()) / 3600000 > 36) { upd.classList.add('stale'); upd.textContent += ' (오래됨)'; }
     }
     DN.renderStreak(); DN.sync();
+  }
+
+  // 홈 화면 설치·오프라인용 서비스 워커(https 또는 localhost에서만 동작)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
   }
 
   bind();

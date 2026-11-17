@@ -7,7 +7,8 @@
     read: 'daily-news-read-v1',
     watch: 'daily-news-watched-v1',
     theme: 'daily-news-theme-v1',
-    view: 'daily-news-view-v1'
+    view: 'daily-news-view-v1',
+    visit: 'daily-news-visit-v1'
   };
   DN.PAGE = 24;
 
@@ -21,7 +22,7 @@
   DN.read = load(K.read, {});
   DN.watched = load(K.watch, {});
   DN.state = {
-    cat: '전체', q: '', outlet: '', sort: 'new', bmOnly: false,
+    cat: '전체', q: '', outlet: '', sort: 'new', bmOnly: false, newOnly: false,
     view: load(K.view, 'card') === 'list' ? 'list' : 'card',
     shown: DN.PAGE, edIdx: 0, edSec: 0
   };
@@ -36,6 +37,20 @@
         .slice(0, ks.length - 2000).forEach(function (k) { delete DN.read[k]; });
     }
     save(K.read, DN.read);
+  };
+
+  // '새 기사' 판정: 지난 방문 때 화면에 있던 기사 id 목록(base)과 비교한다.
+  // 30분 안의 새로고침은 같은 방문으로 보고 base를 유지한다.
+  DN.base = null;
+  DN.initVisit = function (ids) {
+    var SESSION = 30 * 60 * 1000, v = load(K.visit, null), now = Date.now(), base = null;
+    if (v && v.cur) base = (now - v.t > SESSION) ? v.cur : v.base;
+    save(K.visit, { base: base, cur: ids, t: now });
+    DN.base = base ? new Set(base) : null;
+  };
+  DN.isNew = function (x) {
+    if (!DN.base) return false;
+    return (x.ids || [x.id]).some(function (i) { return !DN.base.has(i); });
   };
 
   // 테마: 저장값이 없으면 OS 설정을 따른다

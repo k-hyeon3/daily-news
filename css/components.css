@@ -67,3 +67,14 @@ select.pill{padding-right:10px}
 .note{font-size:12px;color:var(--text-secondary);margin:0}
 mark{background:var(--brand-subtle);color:var(--brand-primary);border-radius:3px;padding:0 1px}
 .kbd{display:inline-block;padding:0 6px;border:1px solid var(--border-default);border-radius:4px;font-size:11px;background:var(--bg-surface)}
+
+/* 새 기사 · 같은 소식 묶음 */
+.card .new{font-size:11px;font-weight:700;color:var(--brand-on);background:var(--status-live);padding:1px 6px;border-radius:var(--radius-sm);letter-spacing:.03em}
+.pill[aria-pressed="true"]{background:var(--brand-subtle);border-color:var(--brand-primary);color:var(--brand-primary)}
+.rel-toggle{align-self:flex-start;padding:0;border:0;background:none;font-size:12px;font-weight:600;color:var(--brand-primary);cursor:pointer}
+.rel-toggle:hover{text-decoration:underline}
+.rel{list-style:none;margin:0;padding:var(--space-sm) 0 0;border-top:1px solid var(--border-default);display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.5}
+.rel .o{font-size:11px;font-weight:600;color:var(--text-secondary);margin-right:6px}
+.rel a{text-decoration:none;overflow-wrap:anywhere}
+.rel a:hover{text-decoration:underline}
+.list .card .rel-toggle,.list .card .rel{display:none}

@@ -3,13 +3,21 @@
   'use strict';
   var el = DN.el, $ = DN.$;
 
+  // 묶음(대표 기사 + related)에 들어 있는 매체 목록과 검색 대상 문자열
+  function outlets(x) { return [x.outlet].concat((x.related || []).map(function (r) { return r.outlet; })); }
+  function hay(x) {
+    return (x.title + ' ' + outlets(x).join(' ') + ' ' + (x.summary || '') + ' ' +
+      (x.related || []).map(function (r) { return r.title; }).join(' ')).toLowerCase();
+  }
+
   DN.filtered = function () {
     var s = DN.state, q = s.q.trim().toLowerCase();
     var out = DN.news.items.filter(function (x) {
       if (s.bmOnly && !DN.bm[x.id]) return false;
       if (s.cat !== '전체' && x.category !== s.cat) return false;
-      if (s.outlet && x.outlet !== s.outlet) return false;
-      if (q && (x.title + ' ' + x.outlet + ' ' + (x.summary || '')).toLowerCase().indexOf(q) < 0) return false;
+      if (s.newOnly && !DN.isNew(x)) return false;
+      if (s.outlet && outlets(x).indexOf(s.outlet) < 0) return false;
+      if (q && hay(x).indexOf(q) < 0) return false;
       return true;
     });
     if (s.sort === 'outlet') out = out.slice().sort(function (a, b) { return a.outlet < b.outlet ? -1 : a.outlet > b.outlet ? 1 : 0; });
@@ -28,10 +36,13 @@
     DN.saveBm(); DN.sync(true);
   };
 
+  function outletsLabel(x) { return '같은 소식 ' + x.related.length + '개 매체 더 보기'; }
+
   function card(x, q) {
     var c = el('article', 'card' + (DN.read[x.id] ? ' is-read' : ''));
     var m = el('div', 'meta');
     m.appendChild(el('span', 'outlet', x.outlet));
+    if (DN.isNew(x)) m.appendChild(el('span', 'new', 'NEW'));
     var t = DN.rel(x.published); if (t) m.appendChild(el('span', 'time', t));
     c.appendChild(m);
 
@@ -39,6 +50,21 @@
     if (x.summary) { var s = el('p', 'sum'); DN.highlight(s, x.summary, q); c.appendChild(s); }
 
     var f = el('div', 'foot');
+    if (x.related && x.related.length) {
+      var rel = el('ul', 'rel'); rel.hidden = true;
+      x.related.forEach(function (r) {
+        var li = el('li'); li.appendChild(el('span', 'o', r.outlet));
+        var ra = DN.link(r.url, ''); DN.highlight(ra, r.title, q); li.appendChild(ra);
+        ra.addEventListener('click', function () { markRead(x.id, c, f); });
+        rel.appendChild(li);
+      });
+      var tg = el('button', 'rel-toggle', outletsLabel(x)); tg.type = 'button'; tg.setAttribute('aria-expanded', 'false');
+      tg.addEventListener('click', function () {
+        var open = rel.hidden; rel.hidden = !open; tg.setAttribute('aria-expanded', String(open));
+        tg.textContent = open ? '접기' : outletsLabel(x);
+      });
+      c.appendChild(tg); c.appendChild(rel);
+    }
     f.appendChild(el('span', 'cat', x.category));
     if (DN.read[x.id]) f.appendChild(el('span', 'read', '읽음'));
     var b = el('button', 'bm'); b.type = 'button';
@@ -74,7 +100,10 @@
   // 매체 드롭다운: 현재 분야에 실제로 있는 매체만 건수와 함께 표시
   DN.renderOutlets = function () {
     var s = DN.state, sel = $('outlet'), counts = {};
-    DN.news.items.forEach(function (x) { if (s.cat === '전체' || x.category === s.cat) counts[x.outlet] = (counts[x.outlet] || 0) + 1; });
+    DN.news.items.forEach(function (x) {
+      if (s.cat !== '전체' && x.category !== s.cat) return;
+      outlets(x).forEach(function (o) { counts[o] = (counts[o] || 0) + 1; });
+    });
     sel.textContent = '';
     var all = el('option', null, '매체 전체'); all.value = ''; sel.appendChild(all);
     Object.keys(counts).sort().forEach(function (k) { var o = el('option', null, k + ' (' + counts[k] + ')'); o.value = k; sel.appendChild(o); });
