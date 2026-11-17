@@ -37,7 +37,7 @@
   // 화면 전체 다시 그리기. keepOutlets: 매체 드롭다운은 그대로 둘 때(검색·북마크 토글)
   DN.sync = function (keepOutlets) {
     renderNav(); if (!keepOutlets) DN.renderOutlets();
-    DN.renderPick(); DN.renderList(); renderBadges();
+    DN.renderPick(); DN.renderReco(); DN.renderList(); renderBadges();
   };
 
   function setCat(c) {

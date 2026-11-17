@@ -78,3 +78,23 @@ mark{background:var(--brand-subtle);color:var(--brand-primary);border-radius:3px
 .rel a{text-decoration:none;overflow-wrap:anywhere}
 .rel a:hover{text-decoration:underline}
 .list .card .rel-toggle,.list .card .rel{display:none}
+
+/* 분야별 오늘의 추천 뉴스 */
+.reco{background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:var(--space-xl);display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:var(--space-2xl)}
+.reco-head{display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)}
+.reco-head .t{font-size:12px;font-weight:600;color:var(--brand-primary);letter-spacing:.04em}
+.reco-head .n{font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--bg-subtle);padding:2px 8px;border-radius:var(--radius-full)}
+.reco h3{font-family:var(--serif);font-size:22px;line-height:1.5;margin:0 0 var(--space-sm);text-wrap:balance;overflow-wrap:anywhere}
+.reco h3 a{text-decoration:none}
+.reco h3 a:hover{text-decoration:underline}
+.reco .sum{margin:0 0 var(--space-md);color:var(--text-secondary);font-size:14px;overflow-wrap:anywhere}
+.reco-outlets{display:flex;flex-wrap:wrap;gap:var(--space-sm)}
+.reco-outlets .chip{font-size:12px;font-weight:600;text-decoration:none;color:var(--brand-primary);background:var(--brand-subtle);padding:4px 10px;border-radius:var(--radius-full)}
+.reco-outlets .chip:hover{text-decoration:underline}
+.reco-more{border-left:1px solid var(--border-default);padding-left:var(--space-xl);min-width:0}
+.reco-more ol{margin:var(--space-sm) 0 0;padding:0;list-style:none;counter-reset:r;display:flex;flex-direction:column;gap:var(--space-md)}
+.reco-more li{counter-increment:r;display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.5;padding-left:28px;position:relative}
+.reco-more li::before{content:counter(r) ;position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:var(--bg-subtle);font-size:12px;font-weight:600;display:grid;place-items:center;color:var(--text-secondary)}
+.reco-more a{text-decoration:none;overflow-wrap:anywhere}
+.reco-more a:hover{text-decoration:underline}
+.reco-more .m{font-size:12px;color:var(--text-secondary)}

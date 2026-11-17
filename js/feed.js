@@ -24,9 +24,12 @@
     return out;
   };
 
+  // 화면 갱신 없이 읽음만 기록(추천 카드 등에서 사용)
+  DN.setRead = function (id) { if (!DN.read[id]) { DN.read[id] = Date.now(); DN.saveRead(); } };
+
   function markRead(id, card, foot) {
     if (DN.read[id]) return;
-    DN.read[id] = Date.now(); DN.saveRead();
+    DN.setRead(id);
     card.classList.add('is-read');
     foot.insertBefore(el('span', 'read', '읽음'), foot.querySelector('.bm'));
   }
