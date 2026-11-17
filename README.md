@@ -22,6 +22,8 @@ js/                     프레임워크 없음. 전역 네임스페이스 DN 하
   pick.js               에디터 픽, 연속 완독
   app.js                사이드바, 이벤트, 단축키, 데이터 로드 (맨 마지막에 불러올 것)
 tools/fetch_news.py     언론사 RSS를 모아 data/news.json 생성 (표준 라이브러리만 사용)
+tools/add_edition.py    에디터 픽 한 호를 editions.json에 합치고 커밋·push (예약 작업이 호출)
+.github/workflows/      3시간마다 뉴스를 모아 GitHub Pages에 배포
 data/news.json          분야별 전체 기사 (fetch_news.py가 만든다)
 data/editions.json      에디터 픽 데이터. 한 줄에 하루치 한 호, 최신이 맨 위
 run-local.bat           뉴스 수집 후 로컬 미리보기 실행 (Python 필요)
@@ -74,7 +76,16 @@ Figma 스타터 요금제는 변수 모드가 1개뿐이라 Light는 `Color`, Da
 
 에디터 픽(`data/editions.json`)은 저장소에 커밋된 파일이 원본이다. 이 파일을 고쳐 push하면 다음 배포에 반영된다.
 
-> 옛 claude.ai 아티팩트 "하루 한 판 뉴스"(slug 047f04b3-3daf-424e-8672-1cda05266dae)와 그 아티팩트를 갱신하는 매일 7시 12분 예약 작업("하루 한 판 뉴스 갱신")은 GitHub로 옮기기 전 방식이다. 예약 작업은 아티팩트의 `editions.json`만 고치므로 GitHub Pages에는 반영되지 않는다.
+### 에디터 픽 매일 갱신
+
+매일 아침 7시 12분의 예약 작업("하루 한 판 뉴스 갱신", https://claude.ai/code/routines/trig_01XFoeg9X5fkj6kdJ8G7Eurg)이 그날 호를 만든다.
+1. 옛 claude.ai 아티팩트(slug 047f04b3-3daf-424e-8672-1cda05266dae)의 `editions.json`을 갱신한다(기존 동작, 그대로 유지).
+2. 같은 레코드를 사용자 PC로 보내 `python tools/add_edition.py --b64z <압축 JSON>`을 실행한다. 이 스크립트가 검증, 병합(같은 날짜는 교체, 최신이 위, 60호까지), 커밋, push를 하고, push되면 Actions가 자동 배포한다.
+
+주의:
+- 2번은 그 시각에 PC가 켜져 있고 Claude 데스크톱이 연결돼 있어야 한다. 아니면 실패 사실만 알리고 넘어간다(아티팩트 갱신과 별개). 빠진 날은 `python tools/add_edition.py --file record.json`으로 나중에 채울 수 있다.
+- 커밋 안 된 `data/editions.json` 변경이 있으면 스크립트가 중단한다. 직접 고친 뒤에는 먼저 커밋하거나 되돌린다.
+- 검증만 해 보려면 `--dry-run`을 붙인다(파일·커밋·push 없음).
 
 ## 데이터 형식
 
