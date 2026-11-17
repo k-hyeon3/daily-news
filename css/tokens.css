@@ -1,3 +1,4 @@
+/* 테마: 기본은 밝은 화면. 어두운 화면은 data-theme="dark"일 때만(사용자가 직접 전환한 경우, OS 설정은 따르지 않음) */
 /* 디자인 토큰: Figma "하루 한 판 뉴스 - Design" 파일의 변수와 같은 이름·값을 쓴다 */
 :root{
   --bg-page:#F6F7F9; --bg-surface:#FFFFFF; --bg-subtle:#ECEEF2;
@@ -10,14 +11,6 @@
   --serif:"Noto Serif KR","Gowun Batang","Nanum Myeongjo",serif;
   --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg-page:#0B0E13; --bg-surface:#1A2028; --bg-subtle:#222B3A;
-    --text-primary:#F6F7F9; --text-secondary:#9AA3B2; --border-default:#2C3440;
-    --brand-primary:#8FB0FF; --brand-subtle:#222B3A; --brand-on:#0B0E13; --status-done:#63C79A;
-    --shadow-card:0 4px 16px rgba(0,0,0,.4); color-scheme:dark;
-  }
 }
 :root[data-theme="dark"]{
   --bg-page:#0B0E13; --bg-surface:#1A2028; --bg-subtle:#222B3A;

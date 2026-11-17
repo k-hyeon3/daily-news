@@ -53,15 +53,10 @@
     return (x.ids || [x.id]).some(function (i) { return !DN.base.has(i); });
   };
 
-  // 테마: 저장값이 없으면 OS 설정을 따른다
-  function applyTheme(t) {
-    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-    else document.documentElement.removeAttribute('data-theme');
-  }
-  function isDark() {
-    var t = document.documentElement.getAttribute('data-theme');
-    return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }
+  // 테마: 기본은 밝은 화면. 사용자가 전환하면 그 선택을 저장하고 다시 바꾸기 전까지 유지한다.
+  // (페이지가 그려지기 전에 index.html 맨 위 인라인 스크립트가 같은 값을 먼저 적용해 깜빡임을 막는다)
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); }
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
   DN.toggleTheme = function () { var t = isDark() ? 'light' : 'dark'; applyTheme(t); save(K.theme, t); };
-  applyTheme(load(K.theme, null));
+  applyTheme(load(K.theme, 'light'));
 })(window.DN);
