@@ -1,0 +1,52 @@
+/* 상태와 localStorage 저장(북마크·읽음·본 영상·테마·보기 방식) */
+(function (DN) {
+  'use strict';
+
+  var K = {
+    bm: 'daily-news-bookmarks-v1',
+    read: 'daily-news-read-v1',
+    watch: 'daily-news-watched-v1',
+    theme: 'daily-news-theme-v1',
+    view: 'daily-news-view-v1'
+  };
+  DN.PAGE = 24;
+
+  function load(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  DN.news = null;       // data/news.json
+  DN.editions = [];     // data/editions.json (최신 호가 맨 앞)
+  DN.cats = [];
+  DN.bm = load(K.bm, {});
+  DN.read = load(K.read, {});
+  DN.watched = load(K.watch, {});
+  DN.state = {
+    cat: '전체', q: '', outlet: '', sort: 'new', bmOnly: false,
+    view: load(K.view, 'card') === 'list' ? 'list' : 'card',
+    shown: DN.PAGE, edIdx: 0, edSec: 0
+  };
+
+  DN.saveBm = function () { save(K.bm, DN.bm); };
+  DN.saveWatched = function () { save(K.watch, DN.watched); };
+  DN.saveView = function () { save(K.view, DN.state.view); };
+  DN.saveRead = function () {
+    var ks = Object.keys(DN.read);
+    if (ks.length > 3000) { // 오래된 것부터 정리해 2000개만 유지
+      ks.sort(function (a, b) { return DN.read[a] - DN.read[b]; })
+        .slice(0, ks.length - 2000).forEach(function (k) { delete DN.read[k]; });
+    }
+    save(K.read, DN.read);
+  };
+
+  // 테마: 저장값이 없으면 OS 설정을 따른다
+  function applyTheme(t) {
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  function isDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  DN.toggleTheme = function () { var t = isDark() ? 'light' : 'dark'; applyTheme(t); save(K.theme, t); };
+  applyTheme(load(K.theme, null));
+})(window.DN);

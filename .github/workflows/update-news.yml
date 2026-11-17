@@ -1,0 +1,52 @@
+name: 뉴스 갱신 및 배포
+
+on:
+  schedule:
+    - cron: "7 */3 * * *"   # 3시간마다(UTC 기준, 한국 시간으로는 9시간 더한 시각)
+  push:
+    branches: [main]        # 코드나 editions.json을 올리면 즉시 다시 배포
+  workflow_dispatch:        # Actions 탭에서 수동 실행
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 수집에 실패하면(기사 0건) 여기서 멈춰서 이전 배포가 그대로 유지된다
+      - name: 뉴스 수집
+        run: python tools/fetch_news.py
+
+      - name: 배포 폴더 구성
+        run: |
+          mkdir _site
+          cp -r index.html css js data _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

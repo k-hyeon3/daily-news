@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하루 한 판 뉴스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="분야 선택">
+    <div>
+      <h1 class="logo">하루 한 판</h1>
+      <p class="tagline">분야별 뉴스를 한눈에</p>
+    </div>
+    <div class="label">분야</div>
+    <ul class="nav" id="nav"></ul>
+    <hr class="sep">
+    <ul class="nav" id="nav2"></ul>
+    <div class="spacer"></div>
+    <div class="streak" id="streak"></div>
+    <p class="upd" id="upd"></p>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search" id="searchBox">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <label class="sr" for="q">기사 검색</label>
+        <input id="q" type="search" placeholder="기사 제목, 매체, 키워드 검색  ( / )" autocomplete="off">
+        <button class="clear" id="clearQ" type="button" aria-label="검색어 지우기">×</button>
+      </div>
+      <button class="icon-btn" id="bmBtn" type="button" aria-pressed="false" aria-label="북마크만 보기 (B)" title="북마크만 보기 (B)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 4h12v17l-6-4-6 4V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span class="badge" id="bmBadge"></span>
+      </button>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="다크 모드 전환 (D)" title="다크 모드 전환 (D)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="head">
+      <p class="date" id="date"></p>
+      <h2 id="title">오늘의 뉴스</h2>
+    </div>
+
+    <section class="pick" id="pick" hidden aria-label="에디터 픽"></section>
+
+    <div class="bar">
+      <h3 id="listTitle">최신 기사</h3>
+      <select class="pill" id="outlet" aria-label="매체 필터"></select>
+      <select class="pill" id="sort" aria-label="정렬">
+        <option value="new">최신순</option>
+        <option value="outlet">매체순</option>
+      </select>
+      <div class="seg" role="group" aria-label="보기 방식">
+        <button type="button" id="vCard" aria-pressed="true">카드형</button>
+        <button type="button" id="vList" aria-pressed="false">목록형</button>
+      </div>
+    </div>
+
+    <div id="feed" class="feed"></div>
+    <button class="pill more" id="more" type="button" hidden>더 보기</button>
+    <p class="note kbd-hint"><span class="kbd">/</span> 검색 · <span class="kbd">B</span> 북마크 · <span class="kbd">D</span> 다크 모드 · <span class="kbd">G</span> 카드/목록 · <span class="kbd">Esc</span> 검색어 지우기. 기사는 각 언론사 RSS에서 수집한 제목·요약이며 본문은 해당 매체에서 읽습니다.</p>
+  </main>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/store.js"></script>
+<script src="js/feed.js"></script>
+<script src="js/pick.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
