@@ -39,6 +39,17 @@
     var top = el('div', 'pick-top');
     top.appendChild(el('span', 't', '에디터 픽'));
     var hl = el('span', 'hl', e.headline); top.appendChild(hl);
+    var rb = el('button', 'reco-refresh pick-refresh', DN.pickNote ? DN.pickNote : '↻ 다른 픽 보기');
+    rb.type = 'button'; rb.title = '새 에디터 픽이 있으면 불러오고, 없으면 다른 픽으로 넘깁니다';
+    if (DN.pickNote) rb.disabled = true;
+    rb.addEventListener('click', function () {
+      rb.disabled = true; rb.textContent = '불러오는 중…';
+      DN.refreshPick(function (msg) {
+        DN.pickNote = msg; DN.renderPick(); DN.renderStreak();
+        setTimeout(function () { DN.pickNote = ''; DN.renderPick(); }, 3000);
+      });
+    });
+    top.appendChild(rb);
     if (DN.editions.length > 1) {
       var sel = el('select'); sel.setAttribute('aria-label', '지난 호 선택');
       DN.editions.forEach(function (x, i) { var o = el('option', null, DN.fmtDate(x.date)); o.value = i; if (i === s.edIdx) o.selected = true; sel.appendChild(o); });

@@ -107,3 +107,6 @@ mark{background:var(--brand-subtle);color:var(--brand-primary);border-radius:3px
 .reco-refresh{margin-left:auto;border:1px solid var(--border-default);background:var(--bg-surface);color:var(--brand-primary);border-radius:var(--radius-full);padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer}
 .reco-refresh:hover:not(:disabled){border-color:var(--brand-primary)}
 .reco-refresh:disabled{color:var(--text-secondary);cursor:default}
+
+.pick-top .pick-refresh{margin-left:auto}
+.pick-top .pick-refresh + select{margin-left:0}
