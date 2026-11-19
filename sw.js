@@ -1,7 +1,7 @@
 /* 서비스 워커: 오프라인에서도 마지막으로 본 화면과 기사 목록이 열리게 한다.
- * 같은 출처의 파일은 '네트워크 우선, 실패하면 캐시'라서 온라인일 때는 항상 최신이다.
+ * 같은 출처의 파일은 '네트워크 우선(HTTP 캐시 무시), 실패하면 캐시'라서 온라인일 때는 항상 최신이다.
  * 구조를 크게 바꿀 때는 VERSION을 올리면 옛 캐시가 지워진다. */
-var VERSION = 'v2';
+var VERSION = 'v3';
 var CACHE = 'daily-news-' + VERSION;
 var SHELL = [
   './', 'index.html', 'manifest.webmanifest',
@@ -26,7 +26,8 @@ self.addEventListener('fetch', function (e) {
   var req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return; // 폰트·외부 링크는 건드리지 않음
   e.respondWith(
-    fetch(req).then(function (res) {
+    // 브라우저 HTTP 캐시(GitHub Pages는 10분)를 거치지 않고 매번 서버에 최신 여부를 확인한다 → 앱 창에서도 배포 직후 바로 반영
+    fetch(req, { cache: 'no-cache' }).then(function (res) {
       if (res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
       return res;
     }).catch(function () {
