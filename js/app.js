@@ -124,28 +124,18 @@
       done(changed ? '최신 뉴스로 갱신했어요' : '이미 가장 최신이에요');
     }).catch(function () { done('불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'); });
   };
-  // 에디터 픽 '다른 픽 보기' 버튼: 편집본(editions.json)을 다시 받아 새 호가 있으면 그것을, 없으면 아직 안 본 다음 픽으로 넘긴다.
+  // 에디터 픽 '다른 기사로 교체' 버튼: editions.json을 다시 받아 새 호가 있으면 그것을, 없으면 지금 뉴스 기준 자동 픽(다음 순위 소식)으로 교체한다.
   function edSig(list) { return list.map(function (e) { return e.date + ':' + (e.headline || '') + ':' + (e.sections || []).length; }).join('|'); }
   DN.refreshPick = function (done) {
     var S = DN.state;
     fetchJson('data/editions.json').then(function (raw) {
       var list = (raw || []).filter(function (x) { return x && x.date; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
       if (list.length && edSig(list) !== edSig(DN.editions)) {
-        DN.editions = list; S.edIdx = 0; S.edSec = 0; done('새 에디터 픽을 불러왔어요'); return;
+        DN.editions = list; S.auto = 0; S.edIdx = 0; S.edSec = 0; done('새 에디터 픽을 불러왔어요'); return;
       }
-      // 변화가 없으면 (현재 호의 나머지 섹션 → 더 이전 호들) 순서로 아직 안 본 픽을 찾고, 다 봤으면 그냥 다음 픽으로 넘어간다
-      var slots = [];
-      DN.editions.forEach(function (e, ei) { (e.sections || []).forEach(function (x, si) { slots.push({ ei: ei, si: si, f: x.field, d: e.date }); }); });
-      var cur = 0; slots.forEach(function (t, i) { if (t.ei === S.edIdx && t.si === S.edSec) cur = i; });
-      var next = null;
-      for (var k = 1; k < slots.length && !next; k++) {
-        var t = slots[(cur + k) % slots.length];
-        if (!(DN.watched[t.d] || {})[t.f]) next = t;
-      }
-      if (!next && slots.length > 1) next = slots[(cur + 1) % slots.length];
-      if (!next) { done('바꿀 다른 픽이 없어요'); return; }
-      S.edIdx = next.ei; S.edSec = next.si;
-      done('다른 픽으로 바꿨어요');
+      // 새 호가 없으면: 방금 모은 뉴스에서 분야별로 다음 순위 소식을 골라 카드 전체를 교체한다
+      S.auto = (S.auto || 0) + 1; S.edSec = 0;
+      done('다른 기사로 교체했어요');
     }).catch(function () { done('불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'); });
   };
   function startLive() {
