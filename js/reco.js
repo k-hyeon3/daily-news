@@ -34,6 +34,17 @@
     var head = el('div', 'reco-head');
     head.appendChild(el('span', 't', '오늘의 ' + s.cat + ' 추천 뉴스'));
     head.appendChild(el('span', 'n', count(main) + '개 매체 보도'));
+    var rb = el('button', 'reco-refresh', DN.recoNote ? DN.recoNote : '↻ 새로 고르기');
+    rb.type = 'button'; rb.title = '최신 뉴스를 지금 받아 추천을 다시 고릅니다';
+    rb.addEventListener('click', function () {
+      rb.disabled = true; rb.textContent = '불러오는 중…';
+      DN.refreshNow(function (msg) {
+        DN.recoNote = msg; DN.renderReco();
+        setTimeout(function () { DN.recoNote = ''; DN.renderReco(); }, 3500);
+      });
+    });
+    if (DN.recoNote) rb.disabled = true;
+    head.appendChild(rb);
     left.appendChild(head);
 
     var h = el('h3'), a = DN.link(main.url, main.title); h.appendChild(a); left.appendChild(h);

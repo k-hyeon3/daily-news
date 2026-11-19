@@ -116,6 +116,14 @@
       } else applyNews(news);
     }).catch(function () {}).then(function () { polling = false; });
   }
+  // 추천 카드의 '새로 고르기' 버튼: 지금 바로 최신 뉴스를 받아 추천을 다시 계산한다. done(결과 문구)
+  DN.refreshNow = function (done) {
+    fetchJson('data/news.json').then(function (news) {
+      var changed = news && news.items && news.items.length && news.updated !== DN.news.updated;
+      if (changed) applyNews(news); else { DN.renderReco(); }
+      done(changed ? '최신 뉴스로 갱신했어요' : '이미 가장 최신이에요');
+    }).catch(function () { done('불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'); });
+  };
   function startLive() {
     setInterval(function () { if (!document.hidden) poll(); }, POLL_MS);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
