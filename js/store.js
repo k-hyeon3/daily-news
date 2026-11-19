@@ -48,6 +48,12 @@
     save(K.visit, { base: base, cur: ids, t: now });
     DN.base = base ? new Set(base) : null;
   };
+  // 열어 둔 채로 새 기사가 들어왔을 때: 비교 기준(base)은 유지해 새 기사가 NEW로 보이게 하고, 저장된 목록만 갱신한다.
+  DN.refreshVisit = function (ids, prevIds) {
+    var v = load(K.visit, null);
+    if (!DN.base) DN.base = new Set(prevIds); // 첫 방문이었다면 방금 전까지 화면에 있던 기사를 기준으로 삼는다
+    save(K.visit, { base: v && v.base ? v.base : prevIds, cur: ids, t: Date.now() });
+  };
   DN.isNew = function (x) {
     if (!DN.base) return false;
     return (x.ids || [x.id]).some(function (i) { return !DN.base.has(i); });

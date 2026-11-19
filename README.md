@@ -28,7 +28,7 @@ js/                     프레임워크 없음. 전역 네임스페이스 DN 하
   app.js                사이드바, 이벤트, 단축키, 데이터 로드 (맨 마지막에 불러올 것)
 tools/fetch_news.py     언론사 RSS를 모아 data/news.json 생성 (표준 라이브러리만 사용)
 tools/add_edition.py    에디터 픽 한 호를 editions.json에 합치고 커밋·push (예약 작업이 호출)
-.github/workflows/      3시간마다 뉴스를 모아 GitHub Pages에 배포
+.github/workflows/      15분마다 뉴스를 모아 GitHub Pages에 배포
 data/news.json          분야별 전체 기사 (fetch_news.py가 만든다)
 data/editions.json      에디터 픽 데이터. 한 줄에 하루치 한 호, 최신이 맨 위
 run-local.bat           뉴스 수집 후 로컬 미리보기 실행 (Python 필요)
@@ -64,11 +64,15 @@ Figma 파일의 변수와 `css/tokens.css`의 CSS 변수는 같은 이름·값�
 Figma 스타터 요금제는 변수 모드가 1개뿐이라 Light는 `Color`, Dark는 `Color Dark` 컬렉션으로 따로 두었다.
 글꼴: 헤드라인 Noto Serif KR, 본문 IBM Plex Sans KR.
 
+## 실시간 갱신
+
+서버(Actions)가 15분마다 새로 배포하고, 열어 둔 화면은 3분마다·탭으로 돌아올 때 `data/news.json`을 다시 받아 바뀌었으면 기사 목록과 맨 위 추천 뉴스를 그 자리에서 갱신한다(새 기사는 NEW 배지). 스크롤을 내려 읽는 중이면 '새 기사 N건 · 눌러서 불러오기' 알림만 띄운다(`js/app.js`의 `POLL_MS`).
+
 ## 배포와 자동 갱신 (GitHub Pages)
 
 `.github/workflows/update-news.yml`이 아래 경우에 뉴스를 새로 모아 Pages에 배포한다.
 
-- 3시간마다(cron `7 */3 * * *`, UTC 기준)
+- 15분마다(cron `*/15 * * * *`. GitHub 예약 작업은 혼잡하면 몇 분 늦을 수 있다)
 - `main`에 push할 때(코드나 `data/editions.json`을 고쳤을 때)
 - Actions 탭에서 수동 실행(Run workflow), 또는 `gh workflow run update-news.yml`
 

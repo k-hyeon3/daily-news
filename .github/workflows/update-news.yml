@@ -2,7 +2,7 @@ name: 뉴스 갱신 및 배포
 
 on:
   schedule:
-    - cron: "7 */3 * * *"   # 3시간마다(UTC 기준, 한국 시간으로는 9시간 더한 시각)
+    - cron: "*/15 * * * *"  # 15분마다(GitHub 예약 작업은 혼잡하면 몇 분 늦게 돈다)
   push:
     branches: [main]        # 코드나 editions.json을 올리면 즉시 다시 배포
   workflow_dispatch:        # Actions 탭에서 수동 실행

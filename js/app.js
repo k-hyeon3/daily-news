@@ -83,6 +83,46 @@
 
   function fetchJson(u) { return fetch(u, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
 
+  function renderUpdated() {
+    var u = new Date(DN.news.updated), upd = $('upd');
+    if (isNaN(u)) return;
+    upd.classList.remove('stale');
+    upd.textContent = '뉴스 업데이트 ' + (u.getMonth() + 1) + '/' + u.getDate() + ' ' + ('0' + u.getHours()).slice(-2) + ':' + ('0' + u.getMinutes()).slice(-2);
+    if ((Date.now() - u.getTime()) / 3600000 > 36) { upd.classList.add('stale'); upd.textContent += ' (오래됨)'; }
+  }
+
+  // 실시간 갱신: 열어 둔 동안 주기적으로(그리고 탭으로 돌아올 때) news.json을 다시 받아 바뀌었으면 화면에 반영한다.
+  // 스크롤을 내려 읽는 중이면 화면을 흔들지 않고 '새 기사 N건' 알림만 띄운다(누르면 반영).
+  var POLL_MS = 3 * 60 * 1000, pending = null, polling = false;
+  function applyNews(news) {
+    pending = null; $('liveBar').hidden = true;
+    var oldIds = {}; DN.news.items.forEach(function (x) { (x.ids || [x.id]).forEach(function (i) { oldIds[i] = 1; }); });
+    var allIds = []; news.items.forEach(function (x) { allIds.push.apply(allIds, x.ids || [x.id]); });
+    DN.news = news;
+    DN.refreshVisit(allIds, Object.keys(oldIds));
+    renderUpdated(); DN.sync(true);
+  }
+  function poll() {
+    if (polling || !DN.news || !DN.news.items) return;
+    polling = true;
+    fetchJson('data/news.json').then(function (news) {
+      if (!news || !news.items || !news.items.length || news.updated === DN.news.updated) return;
+      if (window.scrollY > 300) {
+        var oldIds = {}; DN.news.items.forEach(function (x) { (x.ids || [x.id]).forEach(function (i) { oldIds[i] = 1; }); });
+        var n = news.items.filter(function (x) { return (x.ids || [x.id]).some(function (i) { return !oldIds[i]; }); }).length;
+        pending = news;
+        $('liveBtn').textContent = n ? '새 기사 ' + n + '건 · 눌러서 불러오기' : '뉴스가 갱신되었습니다 · 눌러서 불러오기';
+        $('liveBar').hidden = false;
+      } else applyNews(news);
+    }).catch(function () {}).then(function () { polling = false; });
+  }
+  function startLive() {
+    setInterval(function () { if (!document.hidden) poll(); }, POLL_MS);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
+    window.addEventListener('online', poll);
+    $('liveBtn').addEventListener('click', function () { if (pending) applyNews(pending); window.scrollTo({ top: 0 }); });
+  }
+
   function boot(news, editions) {
     DN.news = news;
     DN.editions = (editions || []).filter(function (x) { return x && x.date; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -101,12 +141,9 @@
     DN.initVisit(allIds);
     var h = decodeURIComponent(location.hash.slice(1)); if (h && DN.cats.indexOf(h) >= 0) S.cat = h;
 
-    var u = new Date(news.updated), upd = $('upd');
-    if (!isNaN(u)) {
-      upd.textContent = '뉴스 업데이트 ' + (u.getMonth() + 1) + '/' + u.getDate() + ' ' + ('0' + u.getHours()).slice(-2) + ':' + ('0' + u.getMinutes()).slice(-2);
-      if ((Date.now() - u.getTime()) / 3600000 > 36) { upd.classList.add('stale'); upd.textContent += ' (오래됨)'; }
-    }
+    renderUpdated();
     DN.renderStreak(); DN.sync();
+    startLive();
   }
 
   // 홈 화면 설치·오프라인용 서비스 워커(https 또는 localhost에서만 동작)
