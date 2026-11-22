@@ -135,10 +135,23 @@
       }
       // 새 호가 없으면: 방금 모은 뉴스에서 분야별로 다음 순위 소식을 골라 카드 전체를 교체한다
       S.auto = (S.auto || 0) + 1; S.edSec = 0;
+      if (S.auto > 5) { S.auto = 0; S.edIdx = 0; done('처음 에디터 픽으로 돌아왔어요'); return; } // 5번 넘기면 원래 에디터 픽으로 한 바퀴
       done('다른 기사로 교체했어요');
     }).catch(function () { done('불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'); });
   };
+  // 에디터 픽 자동 순환: 5분마다 다음 소식으로 바꾼다. 화면이 보이고 '전체' 화면일 때만, 그리고 방금 카드를 만지고 있지 않을 때만(2분) 바꾼다.
+  var ROTATE_MS = 5 * 60 * 1000, touched = 0;
+  function startRotate() {
+    var box = $('pick');
+    ['pointerdown', 'keydown', 'focusin', 'wheel'].forEach(function (ev) { box.addEventListener(ev, function () { touched = Date.now(); }, { passive: true }); });
+    box.addEventListener('pointerenter', function () { touched = Date.now(); });
+    setInterval(function () {
+      if (document.hidden || box.hidden || !DN.editions.length || Date.now() - touched < 2 * 60 * 1000) return;
+      DN.refreshPick(function () { DN.pickNote = ''; DN.renderPick(); });
+    }, ROTATE_MS);
+  }
   function startLive() {
+    startRotate();
     setInterval(function () { if (!document.hidden) poll(); }, POLL_MS);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
     window.addEventListener('online', poll);
