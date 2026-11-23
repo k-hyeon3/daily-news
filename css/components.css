@@ -55,8 +55,10 @@ select.pill{padding-right:10px}
 .bm[aria-pressed="true"] path{fill:currentColor}
 .card.is-read h4 a{color:var(--text-secondary);font-weight:400}
 .list .card{flex-direction:row;align-items:center;padding:var(--space-md) var(--space-lg);box-shadow:none;border-radius:var(--radius-md)}
-.list .card .meta{flex:none;width:150px}
-.list .card .time{margin-left:0}
+.list .card .meta{display:contents}
+.list .card .outlet{flex:none}
+.list .card .time{order:1;flex:none;width:72px;margin-left:0;text-align:right;white-space:nowrap}
+.list .card .foot{order:2}
 .list .card h4{flex:1;font-size:15px}
 .list .card .sum{display:none}
 .list .card .foot{margin-top:0;flex:none}

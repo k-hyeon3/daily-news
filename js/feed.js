@@ -46,7 +46,7 @@
     var m = el('div', 'meta');
     m.appendChild(el('span', 'outlet', x.outlet));
     if (DN.isNew(x)) m.appendChild(el('span', 'new', 'NEW'));
-    var t = DN.rel(x.published); if (t) m.appendChild(el('span', 'time', t));
+    m.appendChild(el('span', 'time', DN.rel(x.published) || '시간 미상'));
     c.appendChild(m);
 
     var h = el('h4'), a = DN.link(x.url, ''); DN.highlight(a, x.title, q); h.appendChild(a); c.appendChild(h);

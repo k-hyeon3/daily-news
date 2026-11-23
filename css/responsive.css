@@ -17,7 +17,7 @@
   .main{padding:var(--space-lg)}
   .head h2{font-size:26px}
   .list .card{flex-wrap:wrap}
-  .list .card .meta{width:auto}
+  .list .card .time{margin-left:auto;width:auto}
   .list .card h4{flex-basis:100%;order:3}
   .kbd-hint{display:none}
 }
