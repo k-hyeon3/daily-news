@@ -112,3 +112,13 @@ mark{background:var(--brand-subtle);color:var(--brand-primary);border-radius:3px
 
 .pick-top .pick-refresh{margin-left:auto}
 .pick-top .pick-refresh + select{margin-left:0}
+
+/* 에디터 픽 한눈에 보기 */
+.brief{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-lg);margin-top:var(--space-md)}
+.brief-card{display:flex;flex-direction:column;gap:var(--space-sm);padding:var(--space-lg);border:1px solid var(--border-default);border-radius:var(--radius-md);background:var(--bg-surface)}
+.brief-card.done{opacity:.7}
+.brief-f{font-size:12px;font-weight:600;color:var(--brand-primary)}
+.brief-card h3{font-size:16px;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.brief-card p{font-size:13px;line-height:1.6;color:var(--text-secondary);margin:0;overflow-wrap:anywhere}
+.brief-go{margin-top:auto;align-self:flex-start;border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--brand-primary);cursor:pointer}
+.brief-go:hover{text-decoration:underline}

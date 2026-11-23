@@ -77,7 +77,27 @@
       sel.addEventListener('change', function () { s.auto = 0; s.edIdx = +sel.value; s.edSec = 0; DN.renderPick(); });
       top.appendChild(sel);
     }
+    var bb = el('button', 'reco-refresh pick-refresh', s.brief ? '탭으로 보기' : '한눈에 보기'); bb.type = 'button';
+    bb.title = '네 분야 핵심을 한 화면에 모아 봅니다'; bb.style.marginLeft = '0';
+    bb.addEventListener('click', function () { s.brief = !s.brief; DN.renderPick(); });
+    top.appendChild(bb);
     box.appendChild(top);
+
+    if (s.brief) {
+      var grid = el('div', 'brief');
+      secs.forEach(function (x, i) {
+        var c = el('article', 'brief-card' + (w[x.field] ? ' done' : ''));
+        c.appendChild(el('span', 'brief-f', x.field));
+        c.appendChild(el('h3', null, x.title));
+        var first = String(x.summary || '').split(/(?<=[.!?。]|다\.)\s+/)[0];
+        c.appendChild(el('p', null, first));
+        var n = (x.articles || []).length;
+        var go = el('button', 'brief-go', '자세히 보기' + (n ? ' · 매체 ' + n + '곳' : '')); go.type = 'button';
+        go.addEventListener('click', function () { s.brief = false; s.edSec = i; DN.renderPick(); });
+        c.appendChild(go); grid.appendChild(c);
+      });
+      box.appendChild(grid); return;
+    }
 
     var tabs = el('div', 'tabs'); tabs.setAttribute('role', 'tablist');
     secs.forEach(function (x, i) {
