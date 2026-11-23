@@ -70,6 +70,11 @@ Figma 스타터 요금제는 변수 모드가 1개뿐이라 Light는 `Color`, Da
 
 에디터 픽은 5분마다(`ROTATE_MS`) 자동으로 다음 소식으로 바뀐다. 새 호가 올라왔으면 그것을, 아니면 지금 뉴스 기준 자동 픽(분야별 다음 순위)을 차례로 보여 주고 5번 넘기면 원래 에디터 픽으로 돌아온다. 카드를 만지는 중(2분 이내)이거나 탭이 가려져 있으면 바꾸지 않는다. 영상·해설이 있는 진짜 에디터 픽은 예약 작업이 하루 3번(07:12·13:12·19:12) 올린다.
 
+## 에디터 픽 자동 생성 (PC 작업 스케줄러)
+
+`tools/register_pick_task.ps1`을 한 번 실행하면 작업 스케줄러에 `DailyNews-EditorPick`이 등록되어 하루 6번(07:10부터 3시간 간격) `tools/run_pick.ps1`이 돈다. Claude Code가 `tools/pick_prompt.md` 지시대로 최근 뉴스(`tools/pick_candidates.py`가 추린 후보)에서 오늘 호를 만들어 `editions.json`에 push하고, 그러면 Actions가 배포한다. 비용은 Claude 구독 사용량뿐이다. PC가 꺼져 있던 시간의 실행은 켠 뒤 바로 실행된다. 로그: `%LOCALAPPDATA%\daily-news-pick`. 해제: `Unregister-ScheduledTask -TaskName DailyNews-EditorPick -Confirm:$false`.
+클라우드(GitHub Actions)에서 돌리는 방법은 API 키와 요금이 필요해 쓰지 않는다.
+
 ## 배포와 자동 갱신 (GitHub Pages)
 
 `.github/workflows/update-news.yml`이 아래 경우에 뉴스를 새로 모아 Pages에 배포한다.
