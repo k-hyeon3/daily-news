@@ -279,9 +279,19 @@ def main():
         kept_items.append(rec)
     kept = kept_items
 
+    # 매체별 수집 상태: 일부라도 실패한 매체만 기록한다(화면에서 안내용)
+    stat = {}
+    for _cat, outlet, n, err in report:
+        s = stat.setdefault(outlet, {"outlet": outlet, "ok": 0, "total": 0})
+        s["total"] += 1
+        if n > 0:
+            s["ok"] += 1
+    health = [s for s in stat.values() if s["ok"] < s["total"]]
+
     out = {
         "updated": datetime.now(KST).isoformat(timespec="seconds"),
         "categories": CATEGORIES,
+        "health": health,
         "items": kept,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

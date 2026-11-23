@@ -89,6 +89,24 @@
     upd.classList.remove('stale');
     upd.textContent = '뉴스 업데이트 ' + (u.getMonth() + 1) + '/' + u.getDate() + ' ' + ('0' + u.getHours()).slice(-2) + ':' + ('0' + u.getMinutes()).slice(-2);
     if ((Date.now() - u.getTime()) / 3600000 > 36) { upd.classList.add('stale'); upd.textContent += ' (오래됨)'; }
+    renderStatus();
+  }
+
+  // 운영 상태: 에디터 픽 생성 시각, 수집에 실패한 매체. 자동화가 멈추면 눈에 띄게 표시한다.
+  function renderStatus() {
+    var upd = $('upd'), box = $('opStatus');
+    if (!box) { box = el('div', 'op-status'); box.id = 'opStatus'; upd.parentNode.insertBefore(box, upd.nextSibling); }
+    box.textContent = '';
+    var e = DN.editions && DN.editions[0], g = e && e.generated ? Date.parse(e.generated) : NaN;
+    if (!isNaN(g)) {
+      var h = (Date.now() - g) / 3600000, p = el('p', 'upd' + (h > 12 ? ' stale' : ''), '에디터 픽 생성 ' + DN.rel(e.generated) + (h > 12 ? ' (멈춘 듯함)' : ''));
+      box.appendChild(p);
+    }
+    var bad = (DN.news && DN.news.health) || [];
+    if (bad.length) {
+      var q = el('p', 'upd stale', '수집 실패: ' + bad.map(function (x) { return x.outlet + (x.ok ? '(' + (x.total - x.ok) + '개 피드)' : ''); }).join(', '));
+      box.appendChild(q);
+    }
   }
 
   // 실시간 갱신: 열어 둔 동안 주기적으로(그리고 탭으로 돌아올 때) news.json을 다시 받아 바뀌었으면 화면에 반영한다.
@@ -131,7 +149,7 @@
     fetchJson('data/editions.json').then(function (raw) {
       var list = (raw || []).filter(function (x) { return x && x.date; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
       if (list.length && edSig(list) !== edSig(DN.editions)) {
-        DN.editions = list; S.auto = 0; S.edIdx = 0; S.edSec = 0; done('새 에디터 픽을 불러왔어요'); return;
+        DN.editions = list; renderStatus(); S.auto = 0; S.edIdx = 0; S.edSec = 0; done('새 에디터 픽을 불러왔어요'); return;
       }
       // 새 호가 없으면: 방금 모은 뉴스에서 분야별로 다음 순위 소식을 골라 카드 전체를 교체한다
       S.auto = (S.auto || 0) + 1; S.edSec = 0;

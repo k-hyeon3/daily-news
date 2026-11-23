@@ -13,6 +13,7 @@
 import argparse
 import base64
 import json
+from datetime import datetime, timezone, timedelta
 import zlib
 import subprocess
 import sys
@@ -85,6 +86,7 @@ def main():
             fail("data/editions.json에 커밋 안 된 변경이 있어 중단합니다")
         git("pull", "--rebase", "--autostash", "--quiet")  # 저장소 쪽 최신 호를 먼저 받는다
 
+    rec["generated"] = datetime.now(timezone(timedelta(hours=9))).isoformat(timespec="seconds")  # 화면의 '생성 시각' 표시용
     cur = json.loads(FILE.read_text(encoding="utf-8")) if FILE.exists() else []
     replaced = any(r.get("date") == rec["date"] for r in cur)
     merged = [rec] + [r for r in cur if r.get("date") != rec["date"]]
