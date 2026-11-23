@@ -19,7 +19,7 @@ if (-not (Test-Path $claude)) { $claude = "claude" }
 # 긴 한글 프롬프트는 인자가 아니라 표준 입력으로 넘긴다(인자로 넘기면 따옴표·줄바꿈이 깨진다)
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$tools = "WebSearch,Read,Write,Bash(python tools/fetch_news.py),Bash(python tools/add_edition.py --file .pick_tmp.json),Bash(rm .pick_tmp.json)"
+$tools = "WebSearch,Read,Write,Bash(python tools/fetch_news.py),Bash(python tools/pick_candidates.py),Bash(python tools/add_edition.py --file .pick_tmp.json),Bash(rm .pick_tmp.json)"
 $prompt | & $claude -p --permission-mode acceptEdits --allowedTools $tools 2>&1 | Out-File $log -Append -Encoding utf8
 "[$(Get-Date -Format s)] 종료 exit=$LASTEXITCODE" | Out-File $log -Append -Encoding utf8
 # 오래된 로그 정리(30개만 유지)
