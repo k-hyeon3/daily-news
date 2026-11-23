@@ -83,7 +83,7 @@ def main():
     if not a.dry_run:
         if git("status", "--porcelain", "--", "data/editions.json").stdout.strip():
             fail("data/editions.json에 커밋 안 된 변경이 있어 중단합니다")
-        git("pull", "--rebase", "--quiet")  # 저장소 쪽 최신 호를 먼저 받는다
+        git("pull", "--rebase", "--autostash", "--quiet")  # 저장소 쪽 최신 호를 먼저 받는다
 
     cur = json.loads(FILE.read_text(encoding="utf-8")) if FILE.exists() else []
     replaced = any(r.get("date") == rec["date"] for r in cur)
