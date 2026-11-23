@@ -11,7 +11,7 @@ $today = (Get-Date).ToString("yyyy-MM-dd")
 Remove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
 Remove-Item Env:ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue
 Set-Location $root
-$prompt = (Get-Content (Join-Path $PSScriptRoot "pick_prompt.md") -Raw -Encoding UTF8).Replace("TODAY", $today)
+$prompt = "Read tools/pick_prompt.md in this repository and follow it exactly. TODAY is $today (Asia/Seoul)."
 $claude = Join-Path $env:USERPROFILE ".local\bin\claude.exe"
 if (-not (Test-Path $claude)) { $claude = "claude" }
 
